@@ -1,0 +1,86 @@
+﻿<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+ <!--<![endif]-->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta http-equiv="pragma" content="no-cache">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireboy &amp; Watergirl in The Light Temple</title>
+
+    <meta name="description" content="">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-60x60.27cf1c05e49cb739.png">
+    <link rel="icon" sizes="60x60" href="icon-60x60.png">
+
+    <meta name="apple-mobile-web-app-title" content="Fireboy &amp; Watergirl in The Light Temple">
+
+
+</head>
+
+<body style="margin: 0px">
+
+    <script type="text/javascript">
+            window.requireNode = window.require;
+            window.require = undefined;
+    </script>
+
+    <!-- build:js scripts/main.js -->
+    <script data-main="js/game.js" src="bower_components/requirejs/require.js"></script>
+    <!-- endbuild -->
+
+    <div id="root">
+        <div id="container"></div>
+        <div id="hammer"></div>
+        <div id="debug-fps" style="color:#ff0000; position: absolute; top: 0;"></div>
+    </div>
+
+<!-- ==================== [CRITICAL INTERVENTION: MUTUAL EXTINCTION] ==================== -->
+<script>
+    // 监听关卡运行状态，对每一关的角色自动挂载碰撞致死
+    setInterval(function() {
+        if (window.Phaser && window.Phaser.GAMES && window.Phaser.GAMES[0]) {
+            var s = window.Phaser.GAMES[0].state.getCurrentState();
+            // 确保进入了关卡并且角色已经生成，且尚未挂载拦截
+            if (s && s.key === "level" && s.pers1 && s.pers2 && !s._modHooked) {
+                s._modHooked = true;
+                
+                var oldUpdate = s.pers1.update;
+                s.pers1.update = function() {
+                    if (s.pers1 && s.pers2 && s.pers1.body && s.pers2.body && !s._isDeadTriggered) {
+                        var dx = s.pers1.body.x - s.pers2.body.x;
+                        var dy = s.pers1.body.y - s.pers2.body.y;
+                        var dist = Math.sqrt(dx * dx + dy * dy);
+
+                        // 触碰距离阈值设为 36 像素
+                        if (dist < 36) {
+                            s._isDeadTriggered = true;
+                            if (typeof s.pers1.kill === "function") s.pers1.kill();
+                            if (typeof s.pers2.kill === "function") s.pers2.kill();
+                            s.gameOver();
+                            return;
+                        }
+                    }
+                    return oldUpdate.apply(this, arguments);
+                };
+            }
+        }
+    }, 200);
+</script>
+<!-- ==================================================================================== -->
+</body>
+</html>
